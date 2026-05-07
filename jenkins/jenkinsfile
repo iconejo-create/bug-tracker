@@ -3,7 +3,7 @@ pipeline {
 
     tools{
         go '1.26.2'
-        node '26.10'
+        nodejs '26.10'
     }
 
     stages {
