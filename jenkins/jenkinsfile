@@ -1,6 +1,10 @@
 pipeline {
     agent any
 
+    tools{
+        go '1.4'
+    }
+
     stages {
         stage('Unit-test Backend') {
             agent{
