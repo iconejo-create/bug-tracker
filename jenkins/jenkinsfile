@@ -7,15 +7,30 @@ pipeline {
     }
 
     stages {
-        stage('Unit-test Backend') {
+        stage('Execute Unit Tests'){
+            parallel{
+                stage('Unit-test Backend') {
             steps {
                 dir('bugtracker-backend'){
-                    sh 'go test -v ./... 2>&1 | go-junit-report > test-results.xml'
+                    sh '''
+                    go test -v ./... 2>&1 | go-junit-report > test-results.xml
+
+                    go test -coverprofile=coverage.out -covermode=atomic ./...
+                    go tool cover -html=coverage.out -o coverage.html
+
+                    mkdir -p reports
+                    mv coverage.html reports/
+                '''
                 }
             }
             post{
                 always{
                     junit 'bugtracker-backend/test-results.xml'
+                    publishHTML target: [
+                        reportDir: 'bugtracker-backend/reports',
+                        reportFiles: 'coverage.html'
+                        reportName: 'Backend Coverage Report'
+                    ]
                 }
             }
         }
@@ -31,7 +46,20 @@ pipeline {
                     sh '''
                         npm ci
                         npm test
+
+                        mkdir -p reports
+                        mv coverage reports/
                     '''
+                }
+            }
+            post{
+                always{
+                    junit 'bugtracker-frontend/test-results.xml'
+                    publishHTML taget[
+                        reportDir: 'bugtracker-frontend/reports/coverage',
+                        reportFiles: 'index.html',
+                        reportName: 'Frontend Coverage Report'
+                    ]
                 }
             }
         }
@@ -63,6 +91,16 @@ pipeline {
                     sh 'npm ci'
                     sh 'npx playwright test'
                 }
+                post{
+                    always {
+                        juinit 'tests-api/tests-results/results.xml'
+                        publishHTML target: [
+                            reportDir: 'tests-api/playwright-report',
+                            reportFiles: 'index.html',
+                            reportName: 'Playwright API Test Report'
+                        ]
+                    }
+                }
             }
         }
         stage('K6 Performance test'){
@@ -79,6 +117,10 @@ pipeline {
                 }
             }
         }
+
+            }
+        }
+        
     }
     post {
         always {
