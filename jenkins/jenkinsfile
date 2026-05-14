@@ -79,7 +79,8 @@ pipeline {
                         sh 'docker compose up --build -d'
                     }
                 }
-
+            }
+        }
                 stage('API Tests') {
                     agent {
                         docker {
@@ -121,13 +122,10 @@ pipeline {
                         }
                     }
                 }
-
-            }
-        }
-    }
     post {
         always {
             cleanWs()
         }
     }
+}
 }
