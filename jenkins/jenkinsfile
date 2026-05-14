@@ -66,66 +66,70 @@ pipeline {
                         }
                     }
                 }
-                
-                stage('Launch App') {
-                    agent {
-                        docker {
-                            image 'docker:27.5.1'
-                            reuseNode true
-                            args '-v /var/run/docker.sock:/var/run/docker.sock -u 0'
-                        }
-                    }
-                    steps {
-                        sh 'docker compose up --build -d'
-                    }
+            }
+        } 
+        
+        stage('Launch App') {
+            agent {
+                docker {
+                    image 'docker:27.5.1'
+                    reuseNode true
+                    args '-v /var/run/docker.sock:/var/run/docker.sock -u 0'
+                }
+            }
+            steps {
+                sh 'docker compose up --build -d'
+            }
+        }
+
+
+        stage('API Tests') {
+            agent {
+                docker {
+                    image 'mcr.microsoft.com/playwright:v1.50.0-jammy'
+                    reuseNode true
+                    args '-u 0 --network=host'
+                }
+            }
+            steps {
+                dir('tests-api') {
+                    sh 'npx wait-port http://localhost:8080/api/health -t 30000'
+                    sh 'npm ci'
+                    sh 'npx playwright test'
+                }
+            }
+            post {
+                always {
+                    junit 'tests-api/tests-results/results.xml'
+                    publishHTML target: [
+                        reportDir: 'tests-api/playwright-report',
+                        reportFiles: 'index.html',
+                        reportName: 'Playwright API Test Report'
+                    ]
                 }
             }
         }
-                stage('API Tests') {
-                    agent {
-                        docker {
-                            image 'mcr.microsoft.com/playwright:v1.50.0-jammy'
-                            reuseNode true
-                            args '-u 0 --network=host'
-                        }
-                    }
-                    steps {
-                        dir('tests-api') {
-                            sh 'npx wait-port http://localhost:8080/api/health -t 30000'
-                            sh 'npm ci'
-                            sh 'npx playwright test'
-                        }
-                    }
-                    post {
-                        always {
-                            junit 'tests-api/tests-results/results.xml'
-                            publishHTML target: [
-                                reportDir: 'tests-api/playwright-report',
-                                reportFiles: 'index.html',
-                                reportName: 'Playwright API Test Report'
-                            ]
-                        }
-                    }
+        
+        stage('K6 Performance test') {
+            agent {
+                docker {
+                    image 'grafana/k6:latest'
+                    reuseNode true
+                    args '--network=host -u root --entrypoint ""'
                 }
-                
-                stage('K6 Performance test') {
-                    agent {
-                        docker {
-                            image 'grafana/k6:latest'
-                            reuseNode true
-                            args '--network=host -u root --entrypoint ""'
-                        }
-                    }
-                    steps {
-                        dir('tests-perf') {
-                            sh 'k6 run script.js'
-                        }
-                    }
+            }
+            steps {
+                dir('tests-perf') {
+                    sh 'k6 run script.js'
                 }
+            }
+        }
+        
+    } 
+
     post {
         always {
             cleanWs()
         }
     }
-}
 }
