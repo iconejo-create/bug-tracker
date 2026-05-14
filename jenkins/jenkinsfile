@@ -1,20 +1,20 @@
 pipeline {
     agent any
-
-    tools {
-        go '1.26.2'
-        nodejs '26.10'
-    }
-
     stages {
         stage('Execute Unit Tests') {
             parallel {
                 
                 stage('Unit-test Backend') {
+                    agent{
+                        docker{
+                            image 'snakee/golang-junit:1.21'
+                            reuseNode true
+                        }
+                    }
+                    
                     steps {
                         dir('bugtracker-backend') {
                             sh '''
-                            # Note: ensure go-junit-report is installed on your agent
                             go test -v ./... 2>&1 | go-junit-report > test-results.xml
 
                             go test -coverprofile=coverage.out -covermode=atomic ./...
