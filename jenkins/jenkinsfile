@@ -15,6 +15,14 @@ pipeline {
                     steps {
                         dir('bugtracker-backend') {
                             sh '''
+
+                             # Set Go cache to a writable location
+                            export GOCACHE="$PWD/.cache/go-build"
+                            export GOMODCACHE="$PWD/.cache/go-mod"
+
+                            # Create cache directories
+                            mkdir -p "$GOCACHE" "$GOMODCACHE"
+                        
                             go test -v ./... 2>&1 | go-junit-report > test-results.xml
 
                             go test -coverprofile=coverage.out -covermode=atomic ./...
