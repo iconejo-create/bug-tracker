@@ -143,7 +143,7 @@ jobs:
               with:
                 name: performance-raw-results
                 path: summary.json
-                retenetion-days: 15
+                retention-days: 15
 
             - name: Upload K6 Perf HTML Report
               if: always()
@@ -151,7 +151,7 @@ jobs:
               with:
                 name: performance-raw-results
                 path: perf-results.html
-                retenetion-days: 15
+                retention-days: 15
 
 
             - name: Publish E2E Test Restults
