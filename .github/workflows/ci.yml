@@ -99,7 +99,7 @@ jobs:
               run: |
                 npm ci
                 npx playwright install
-                npx playwright tests
+                npx playwright test
 
             - name: Shut Down App
               run: docker compose down
