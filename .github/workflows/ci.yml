@@ -120,5 +120,26 @@ jobs:
                 name: API Test Report
                 path: ./tests-api/test-results/results.xml
                 reporter: jest-junit
+    
+    e2e-Tests:
+        needs: [unit-tests-backend, unit-tests-frontend]
+        runs-on: ubuntu-latest
+        permissions:
+            contents: read
+            checks: write
+            pull-requests: write
+        steps: 
+            - name: Checkout repository
+              uses: actions/checkout@v4
+            
+            - name: Run E2E Tests
+              working-directory: ./tests-e2e
+              run: |
+                npm ci
+                npx playwright tests
+
+            
+
+          
 
     
