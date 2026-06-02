@@ -38,7 +38,8 @@ jobs:
                  reporter: jest-junit
 
     unit-tests-frontend:
-        needs: unit-tests-backend
+        #needs: unit-tests-backend
+        #If you remove the needs from this section it will run in parallel 
         runs-on: ubuntu-latest
         permissions:
             contents: read
