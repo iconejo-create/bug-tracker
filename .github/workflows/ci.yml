@@ -72,7 +72,7 @@ jobs:
                  name: Frontend Unit Tests Report
                  path: bugtracker-frontend/test-results.xml
                  reporter: jest-junit
-    api-tests:
+    api-tests-e2e:
         needs: [unit-tests-backend, unit-tests-frontend]
         runs-on: ubuntu-latest
         permissions:
@@ -93,6 +93,12 @@ jobs:
               run: |
                 npm ci
                 npx playwright test
+
+            - name: Run E2E Tests
+              working-directory: ./tests-e2e
+              run: |
+                npm ci
+                npx playwright tests
 
             - name: Shut Down App
               run: docker compose down
@@ -121,22 +127,6 @@ jobs:
                 path: ./tests-api/test-results/results.xml
                 reporter: jest-junit
     
-    e2e-Tests:
-        needs: [api-tests]
-        runs-on: ubuntu-latest
-        permissions:
-            contents: read
-            checks: write
-            pull-requests: write
-        steps: 
-            - name: Checkout repository
-              uses: actions/checkout@v4
-            
-            - name: Run E2E Tests
-              working-directory: ./tests-e2e
-              run: |
-                npm ci
-                npx playwright tests
 
             
 
