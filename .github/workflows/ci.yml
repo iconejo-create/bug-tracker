@@ -98,7 +98,7 @@ jobs:
               working-directory: ./tests-e2e
               run: |
                 npm ci
-                npm playwright install
+                npx playwright install
                 npx playwright tests
 
             - name: Shut Down App
@@ -119,6 +119,22 @@ jobs:
                 name: api-test-playwright-report
                 path: ./tests-api/playwright-report/
                 retention-days: 15
+
+            - name: Upload E2E Test Results
+              if: always()
+              uses: actions/upload-artifact@v4
+              with:
+                name: e2e-tests-results
+                path: ./tests-e2e/tests-results
+                retention-days: 15
+
+            - name: Publish E2E Test Restults
+              uses: dorny/test-reporter@v1
+              if: always()
+              with:
+                name: E2E Test Report
+                path: ./tests-e2e/test-results/results.xml
+                reporter: jest-junit
 
             - name: Publish API Test Restults
               uses: dorny/test-reporter@v1
