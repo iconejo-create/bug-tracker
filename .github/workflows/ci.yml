@@ -149,7 +149,7 @@ jobs:
               if: always()
               uses: actions/upload-artifact@v4
               with:
-                name: performance-raw-results
+                name: performance-HTML-report
                 path: perf-results.html
                 retention-days: 15
 
