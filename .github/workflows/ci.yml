@@ -122,7 +122,7 @@ jobs:
                 reporter: jest-junit
     
     e2e-Tests:
-        needs: [unit-tests-backend, unit-tests-frontend]
+        needs: [api-tests]
         runs-on: ubuntu-latest
         permissions:
             contents: read
